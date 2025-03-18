@@ -48,18 +48,20 @@ export class ContactService {
     let index = _.findIndex(this.mockList, (c) => c.id === contact.id);
   
     if (index === -1) {
-      // If the contact doesn't exist, add it
-      this.mockList = [...this.mockList, { ...contact, id: this.getNextId() }];
+      // If the contact doesn't exist, create a new contact with a new id and add it to the list
+      const newContact = { ...contact, id: this.getNextId() };
+      this.mockList = [...this.mockList, newContact];
+      return of(newContact);
     } else {
-      // If the contact exists, replace it with a new object
+      // If the contact exists, update it
+      const updatedContact = { ...contact };
       this.mockList = [
         ...this.mockList.slice(0, index),
-        contact,
+        updatedContact,
         ...this.mockList.slice(index + 1)
       ];
+      return of(updatedContact);
     }
-  
-    return of(contact);
   }
   
 
@@ -68,9 +70,7 @@ export class ContactService {
     return this.mockList.length > 0 ? Math.max(...this.mockList.map(c => c.id)) + 1 : 1;
   }
 
-  //#endregion
-
-  editContactDialog$(contact: Contact) : Observable<Contact> {
+  editContactDialog$(contact: Contact | null) : Observable<Contact> {
 
     const dialogRef = this.dialog.open(ContactEditDialogComponent, {
       data: {
@@ -81,5 +81,7 @@ export class ContactService {
     return dialogRef.afterClosed();
 
   }
+
+  //#endregion
 
 }
