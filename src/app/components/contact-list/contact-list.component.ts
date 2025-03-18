@@ -33,5 +33,7 @@ export class ContactListComponent {
     this.store.dispatch(actions.editContactClicked({contact}))
   }
 
-
+  addContactClicked(): void {
+    this.store.dispatch(actions.addContactClicked());
+  }
 }

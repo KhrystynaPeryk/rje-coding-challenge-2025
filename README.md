@@ -26,7 +26,64 @@ In our main code base, you would expect to find this architecture replicated wit
 
 # Answers
 
-1. //Optionally provide any notes relating to question 1 here.
-2. //Optionally provide any notes relating to question 2 here.
-3. //Provide your answer to question 3 here.
-4. //Provide your link or location of your file within the repo here.
+1. 
+To show a loading message while a contact list is loading `src/app/components/contact-list/contact-list.component.html` was modified: 
+
+    - <ng-container *ngIf="contactList$ | async as contactList"> subscribes to the observable and assigns the emitted array to a local variable called contactList; 
+
+    - <div *ngIf="contactList.length === 0; else contactListLoaded"> checks if the list is empty. If it is, it shows a "Loading contacts..." message.
+
+    - <ng-template #contactListLoaded> block contains the existing markup to iterate over and display the contacts.
+
+2. 
+Below are the modifications made to add the "Add Contact" functionality while re-using the existing contact-edit dialog:
+
+**Actions:**  
+   - Added a new action `addContactClicked` in `src/app/state/actions.ts` to trigger the add contact flow.
+
+**Effects:**  
+   - Created a new effect `launchAddDialog$` in `src/app/state/effects.ts` that listens for the `addContactClicked` action.
+   - This effect opens the contact-edit dialog with a `null` parameter, indicating that a new contact is being added.
+   - When the dialog closes, it dispatches either `editContactConfrimed` (if a contact is returned) or `editContactCancelled` (if the dialog is canceled).
+
+**Component TypeScript:**  
+   - Added a new method `addContactClicked()` in `src/app/components/contact-list/contact-list.component.ts` to dispatch the `addContactClicked` action.
+
+**Component Template:**  
+   - Updated `src/app/components/contact-list/contact-list.component.html` to include an "Add Contact" button that calls the new `addContactClicked()` method.
+
+**Dialog Enhancement:**  
+   - Modified `src/app/dialogs/contact-edit-dialog/contact-edit-dialog.component.html` to display "Add New Contact" as the title when no contact data is provided.
+
+3. 
+# Handling Service Errors in Effects
+
+Since effects deal with external interactions, there's always a possibility that a service function might throw an error. To handle errors gracefully, we can use the `catchError` operator provided by RxJS. Here’s what should be done:
+
+## Steps to Handle Errors
+
+- **Define Error Actions:**  
+  Create specific error actions (e.g., `contactListFailed`, `editContactFailed`) that will capture the error payload. These actions can be dispatched when an error occurs in an effect.
+
+- **Update Effects with Error Handling:**  
+  In each effect that interacts with an external service, modify the observable chain to include the `catchError` operator.
+  - Use `catchError` to intercept errors from your service calls.
+  - Inside `catchError`, return an observable (using `of`) that dispatches the appropriate error action. This ensures that when an error occurs, the effect doesn’t fail silently, and your application can respond (e.g., by logging the error or displaying an error message).
+
+## Example Snippet
+
+```typescript
+import { catchError, of } from 'rxjs';
+
+retrieveContactList$ = createEffect(() => this.actions$.pipe(
+    ofType(actions.appStarted),
+    concatMap(() =>
+        this.contactService.getContactList$().pipe(
+            map(contactList => actions.contactListReturned({ contactList })),
+            // Catch any error thrown by the service and dispatch an error action
+            catchError(error => of(actions.contactListFailed({ error })))
+        )
+    )
+));
+
+4. 
