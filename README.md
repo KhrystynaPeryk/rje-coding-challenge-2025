@@ -26,7 +26,8 @@ In our main code base, you would expect to find this architecture replicated wit
 
 # Answers
 
-1. 
+## ASSIGNMENT 1. 
+
 To show a loading message while a contact list is loading `src/app/components/contact-list/contact-list.component.html` was modified: 
 
     - <ng-container *ngIf="contactList$ | async as contactList"> subscribes to the observable and assigns the emitted array to a local variable called contactList; 
@@ -35,7 +36,7 @@ To show a loading message while a contact list is loading `src/app/components/co
 
     - <ng-template #contactListLoaded> block contains the existing markup to iterate over and display the contacts.
 
-2. 
+## ASSIGNMENT 2.
 Below are the modifications made to add the "Add Contact" functionality while re-using the existing contact-edit dialog:
 
 **Actions:**  
@@ -54,13 +55,13 @@ Below are the modifications made to add the "Add Contact" functionality while re
 
 **Dialog Enhancement:**  
    - Modified `src/app/dialogs/contact-edit-dialog/contact-edit-dialog.component.html` to display "Add New Contact" as the title when no contact data is provided.
-
-3. 
-# Handling Service Errors in Effects
+     
+## ASSIGNMENT 3.
+### Handling Service Errors in Effects
 
 Since effects deal with external interactions, there's always a possibility that a service function might throw an error. To handle errors gracefully, we can use the `catchError` operator provided by RxJS. Here’s what should be done:
 
-## Steps to Handle Errors
+### Steps to Handle Errors
 
 - **Define Error Actions:**  
   Create specific error actions (e.g., `contactListFailed`, `editContactFailed`) that will capture the error payload. These actions can be dispatched when an error occurs in an effect.
@@ -70,7 +71,7 @@ Since effects deal with external interactions, there's always a possibility that
   - Use `catchError` to intercept errors from your service calls.
   - Inside `catchError`, return an observable (using `of`) that dispatches the appropriate error action. This ensures that when an error occurs, the effect doesn’t fail silently, and your application can respond (e.g., by logging the error or displaying an error message).
 
-## Example Snippet
+### Example Snippet
 
 ```typescript
 import { catchError, of } from 'rxjs';
@@ -85,5 +86,40 @@ retrieveContactList$ = createEffect(() => this.actions$.pipe(
         )
     )
 ));
+```
+## ASSIGNMENT 4.
+Figma design (sam.ralston@rjeglobal.com invited) -> https://www.figma.com/design/nDoV2rESf6Za71B2f2xiwz/Khrystyna?node-id=1450-2&p=f&t=TRpxGKjK6IHaPDKp-0
 
-4. 
+#### UI Flow Analysis:
+
+- Contacts List View: Shows all contacts with view/edit options
+- Contact Details View: Shows contact information with tabs for Details and Project Roles
+- Projects List View: Shows all available projects
+- Add Contact Modal: Form for adding a new contact
+- Contact's Project Roles View): Shows all projects and roles for a specific contact
+- View Contact Modal: Shows contact details in a modal view
+- Add Project Role Modal: Interface for assigning a new project role to a contact
+
+#### Implementation Steps:
+##### 1. Models
+- Create a Project model with required fields (id, name, description, etc.)
+- Create a ContactProjectRole model to represent the many-to-many relationship between contacts and projects with roles
+```typescript
+export interface ContactProjectRole {
+  id: string;
+  contactId: string;
+  projectId: string;
+  role: Role;
+}
+```
+##### 2. Services
+- Create/Update ProjectService to handle project-related operations
+- Create a new ContactProjectRoleService to manage the relationship between contacts, projects, and roles
+  
+##### 3. State Management
+- Update ContactState to track contacts and selected contact
+- Create ProjectState to manage project data
+- Create ContactProjectRoleState to manage role assignments for contacts across projects
+
+##### 4. Component creation
+##### 5. Routing setup
